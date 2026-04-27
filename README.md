@@ -9,7 +9,10 @@ custom:
   pythonUvConverter:
     overwrite: true # can overwrite existing requirements.txt files
     dependencyGroup: dev # if you have additional dependency groups you want to install.
-
+    optionalDependencies: # fetch dependencies from [project.optional-dependencies]
+      - aws
+      - azure # can also be the string "all" to fetch all optional dependencies
+    pyprojectPath: ../../pyproject.toml # Path to pyproject.toml (can be absolute or relative)
 plugins:
     - serverless-python-uv-converter
     - serverless-python-requirements

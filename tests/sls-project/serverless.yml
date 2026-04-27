@@ -1,0 +1,21 @@
+service: sls-project-test
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.9
+
+custom:
+  pythonUvConverter:
+    # Testing our new feature
+    pyprojectPath: ../my-custom-path/pyproject.toml
+    dependencyGroup: dev
+    optionalDependencies: all
+    overwrite: true
+
+plugins:
+  - serverless-python-uv-converter
+
+functions:
+  hello:
+    handler: handler.hello

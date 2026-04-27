@@ -19,7 +19,7 @@ ensureTomlInstalled();
 
 const fs = require('fs');
 const path = require('path');
-const toml = require('./node_modules/@iarna/toml'); // relative to plugin file
+const toml = require('@iarna/toml');
 
 class PythonUvConverter {
   constructor(serverless, options) {
@@ -33,11 +33,18 @@ class PythonUvConverter {
 
   convertPyproject() {
     const servicePath = this.serverless.serviceDir || process.cwd();
-    const requirementsPath = path.join(servicePath, 'requirements.txt');
 
     const config = this.serverless.service.custom?.pythonUvConverter || {};
     const overwrite = config.overwrite || false;
     const depGroup = config.dependencyGroup || null;
+    const optDepsConfig = config.optionalDependencies || config.optionalDependancy || null;
+
+    let pyprojectPath = path.join(servicePath, 'pyproject.toml');
+    if (config.pyprojectPath) {
+      pyprojectPath = path.resolve(servicePath, config.pyprojectPath);
+    }
+
+    const requirementsPath = path.join(path.dirname(pyprojectPath), 'requirements.txt');
 
     // Check if requirements.txt exists
     if (fs.existsSync(requirementsPath) && !overwrite) {
@@ -45,9 +52,8 @@ class PythonUvConverter {
       return;
     }
 
-    const pyprojectPath = path.join(servicePath, 'pyproject.toml');
     if (!fs.existsSync(pyprojectPath)) {
-      this.serverless.cli.log('No pyproject.toml found, skipping requirements.txt generation.');
+      this.serverless.cli.log(`No pyproject.toml found at ${pyprojectPath}, skipping requirements.txt generation.`);
       return;
     }
 
@@ -62,6 +68,24 @@ class PythonUvConverter {
     }
 
     // optional dependencies (PEP 621)
+    let optDepsList = [];
+    if (optDepsConfig === 'all') {
+      if (pyproject.project?.['optional-dependencies']) {
+        optDepsList = Object.keys(pyproject.project['optional-dependencies']);
+      }
+    } else if (Array.isArray(optDepsConfig)) {
+      optDepsList = optDepsConfig;
+    } else if (typeof optDepsConfig === 'string') {
+      optDepsList = [optDepsConfig];
+    }
+
+    for (const optDep of optDepsList) {
+      if (pyproject.project?.['optional-dependencies']?.[optDep]) {
+        dependencies.push(...pyproject.project['optional-dependencies'][optDep]);
+      }
+    }
+
+    // legacy or single group check for dependencyGroup
     if (depGroup && pyproject.project?.['optional-dependencies']?.[depGroup]) {
       dependencies.push(...pyproject.project['optional-dependencies'][depGroup]);
     }

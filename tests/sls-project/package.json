@@ -1,0 +1,11 @@
+{
+  "name": "sls-project-test",
+  "version": "1.0.0",
+  "dependencies": {
+    "@iarna/toml": "^2.2.5"
+  },
+  "devDependencies": {
+    "serverless": "^3.39.0",
+    "serverless-python-uv-converter": "file:../../src"
+  }
+}

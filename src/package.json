@@ -1,6 +1,6 @@
 {
   "name": "serverless-python-uv-converter",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Serverless plugin to convert pyproject.toml to requirements.txt",
   "main": "index.js",
   "keywords": [
